@@ -16,7 +16,7 @@
         <input type="checkbox" id="semester-checkbox" 
             @change="updateGPA()"
             v-model="semester.included">
-        <label for="semester-checkbox">Include this semester</label></p>
+        <label for="semester-checkbox">Include semester in GPA</label></p>
         <div v-for="(course, course_index) in semester.courses"
             :key="course_index">
           <input :value="course.title" 
@@ -31,7 +31,7 @@
           <input type="checkbox" id="course-checkbox" 
               @change="updateGPA()"
               v-model="semesters[sem_index].courses[course_index].included">
-          <label for="course-checkbox">Include this course</label>
+          <label for="course-checkbox">Include course in GPA</label>
         </div>
         <p><button @click="addCourse(sem_index)">Add Course</button></p>
         <p>Semester credits: {{semester.credits}}, Semester GPA: {{semester.gpa}}</p>
@@ -63,6 +63,7 @@ let ref = {
 };
 export default {
   // npm run serve
+  // npm i
   data() {
     return {
       //gradient: 'linear-gradient(315deg,#36fa7a,#D49CE6,#2E1BDA)',
