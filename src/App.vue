@@ -39,7 +39,10 @@
     </div>
     <p><button @click="addSemester">Add Semester</button></p>
     <p>Total credit hours: {{hours}}, Overall GPA: {{gpa}}</p>
-    <p>By <a href="https://www.github.com/devonrd">Devon Doyle</a></p>
+    <p>Made on an 
+      <i class="icons fa fa-solid fa-plane fa-lg"></i> 
+      by <a target="_blank" href="https://devondoyle.com/">Devon Doyle</a>
+    </p>
   </div>
 </div>
 
@@ -83,6 +86,7 @@ export default {
     }
   },
   methods: {
+    /*
     onInput(e) {
       this.text = e.target.value;
     },
@@ -90,6 +94,7 @@ export default {
       this.math = parseFloat(e.target.value) * Math.PI;
       this.mathtext = e.target.value;
     },
+    */
     updateSemesterAttribute(e, index, attribute) {
       this.semesters[index][attribute] = e.target.value;
     },
@@ -188,12 +193,12 @@ export default {
 
 
 <style>
-body {
+html, body {
   margin: 0;
-  height: 100%;
+  min-height: 100vh;
 }
 #app {
-  height: 100%;
+  min-height: 100vh;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   /*color: #2c3e50;*/
   color: white;
@@ -221,6 +226,10 @@ button:hover {
   border: none;
   outline-color: white;
 }
+i {
+  color: white;
+  padding: 4px;
+}
 .semester-wrapper {
   padding-top: 1%;
   padding-bottom: 1%;
@@ -229,6 +238,9 @@ button:hover {
   border: 1px solid white;
   border-radius: 8px;
   padding: 2%;
+}
+a {
+  color: white;
 }
 
 </style>
