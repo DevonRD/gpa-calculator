@@ -10,15 +10,20 @@
     <div v-for="(semester, sem_index) in semesters"
         :key="sem_index" class="semester-wrapper">
       <div class="semester-data">
-        <p><input :value="semester.title" 
+        <p>
+          <input type="checkbox" id="semester-checkbox" 
+              @change="updateGPA()"
+              v-model="semester.included">
+          <input :value="semester.title" 
               @input="updateSemesterAttribute($event, sem_index, 'title')" 
               placeholder="Semester name (optional)" />
-        <input type="checkbox" id="semester-checkbox" 
-            @change="updateGPA()"
-            v-model="semester.included">
-        <label for="semester-checkbox">Include semester in GPA</label></p>
+          <button @click="removeSemester(sem_index)">Delete</button>
+        </p>
         <div v-for="(course, course_index) in semester.courses"
             :key="course_index">
+          <input type="checkbox" id="course-checkbox" 
+              @change="updateGPA()"
+              v-model="semesters[sem_index].courses[course_index].included">
           <input :value="course.title" 
               @input="updateCourseAttribute($event, sem_index, course_index, 'title')" 
               placeholder="Course name (optional)" />
@@ -28,10 +33,7 @@
           <input :value="course.grade" 
               @input="updateCourseAttribute($event, sem_index, course_index, 'grade')" 
               placeholder="Grade" />
-          <input type="checkbox" id="course-checkbox" 
-              @change="updateGPA()"
-              v-model="semesters[sem_index].courses[course_index].included">
-          <label for="course-checkbox">Include course in GPA</label>
+          <button @click="removeCourse(sem_index, course_index)">Delete</button>
         </div>
         <p><button @click="addCourse(sem_index)">Add Course</button></p>
         <p>Semester credits: {{semester.credits}}, Semester GPA: {{semester.gpa}}</p>
@@ -39,7 +41,7 @@
     </div>
     <p><button @click="addSemester">Add Semester</button></p>
     <p>Total credit hours: {{hours}}, Overall GPA: {{gpa}}</p>
-    <p>Made on an 
+    <p>Made on a 
       <i class="icons fa fa-solid fa-plane fa-lg"></i> 
       by <a target="_blank" href="https://devondoyle.com/">Devon Doyle</a>
     </p>
@@ -137,6 +139,9 @@ export default {
       };
       this.semesters.push(newSem);
     },
+    removeSemester(sem_index) {
+      this.semesters.splice(sem_index, 1);
+    },
     addCourse(sem_index) {
       let newCourse = {
         title: "",
@@ -146,6 +151,9 @@ export default {
         included: true
       };
       this.semesters[sem_index].courses.push(newCourse);
+    },
+    removeCourse(sem_index, course_index) {
+      this.semesters[sem_index].courses.splice(course_index, 1);
     },
     downloadData() {
       let dataString = JSON.stringify(this.semesters);
@@ -207,7 +215,9 @@ html, body {
   padding: 5%;
 }
 #test {
-  color: #36fa7a
+  color: #36fa7a; /* old green */
+  color: #2E1BDA; /* blue */
+  color: #7e1bda;
 }
 button {
   margin-right: 5px;
@@ -216,6 +226,7 @@ button {
   border-radius: 5px;
   color: white;
   padding: 5px;
+  margin: 5px;
 }
 button:hover {
   opacity: 60%;
