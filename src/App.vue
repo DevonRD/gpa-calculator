@@ -345,25 +345,7 @@ export default {
     },
 
     reset() {
-      this.semesters = [
-        {
-          title: "",
-          courses: [
-            {
-              title: "",
-              credits: "",
-              grade: "",
-              color: "#ffffff",
-              included: true, 
-              custom: false,
-              customGrades: []
-            }
-          ],
-          credits: 0,
-          gpa: 0,
-          included: true
-        }
-      ];
+      this.semesters = [];
       this.gpa = 0;
       this.hours = 0;
     },
