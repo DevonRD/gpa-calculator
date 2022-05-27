@@ -405,6 +405,7 @@ export default {
       this.gradient = 'linear-gradient(315deg,#1bd3ef,#2E1BDA)';
       document.getElementById('gpa-calc-app').style.display = 'block';
       document.getElementById('course-grade-calc').style.display = 'none';
+      this.updateGPA();
     },
 
     resetCustom() {
