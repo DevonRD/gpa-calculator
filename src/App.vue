@@ -1,56 +1,74 @@
 <template>
 <div id="app" :style="{background: gradient}">
   <div id="gpa-calc-app">
-    <h1>GPA Calculator 1.0</h1>
+    
+    <div style="width: 70%; display: inline-block; vertical-align: top;">
+      <h1>GPA Calculator 1.0</h1>
+      <p><button class="menu-button" @click="downloadData()">Save Data</button>
+      <button class="menu-button" @click="uploadData()">Load Data</button>
+      <button class="menu-button" @click="reset()">Reset</button></p>
 
-    <p><button class="menu-button" @click="downloadData()">Save Data</button>
-    <button class="menu-button" @click="uploadData()">Load Data</button>
-    <button class="menu-button" @click="reset()">Reset</button></p>
-
-    <div v-for="(semester, sem_index) in semesters"
-        :key="sem_index" class="semester-wrapper">
-      <hr>
-      <div class="semester-data">
-        <p>
-          <input type="checkbox" id="semester-checkbox" 
-              @change="updateGPA()"
-              v-model="semester.included">
-          <input :value="semester.title" 
-              @input="updateSectionAttribute($event, sem_index, 'title', 'gpa')" 
-              placeholder="Semester (e.g. Fall 2022)" />
-          <button @click="removeSection(sem_index)">Delete Semester</button>
-        </p>
-        <div v-for="(course, course_index) in semester.courses"
-            :key="course_index">
-          <input type="checkbox" id="course-checkbox" 
-              @change="updateGPA()"
-              v-model="semesters[sem_index].courses[course_index].included">
-          <input :value="course.title" 
-              @input="updateComponentAttribute($event, sem_index, course_index, 'title')" 
-              placeholder="Course (e.g. EECS 445)" />
-          <input :value="course.credits" 
-              @input="updateComponentAttribute($event, sem_index, course_index, 'credits')" 
-              placeholder="Credit hours" />
-          <input v-if="course.custom" :value="course.grade" 
-              @input="updateComponentAttribute($event, sem_index, course_index, 'grade')" 
-              placeholder="Grade" disabled/>
-          <input v-else :value="course.grade" 
-              @input="updateComponentAttribute($event, sem_index, course_index, 'grade')" 
-              placeholder="Grade" />
-          <button @click="startCustomGrade(sem_index, course_index)">Custom Grade</button>
-          <button @click="removeComponent(sem_index, course_index, 'gpa')">Delete Course</button>
+      <div v-for="(semester, sem_index) in semesters"
+          :key="sem_index" class="semester-wrapper">
+        <hr>
+        <div class="semester-data">
+          <p>
+            <input type="checkbox" id="semester-checkbox" 
+                @change="updateGPA()"
+                v-model="semester.included">
+            <input :value="semester.title" 
+                @input="updateSectionAttribute($event, sem_index, 'title', 'gpa')" 
+                placeholder="Semester (e.g. Fall 2022)" />
+            <button @click="removeSection(sem_index)">Delete Semester</button>
+          </p>
+          <div v-for="(course, course_index) in semester.courses"
+              :key="course_index">
+            <input type="checkbox" id="course-checkbox" 
+                @change="updateGPA()"
+                v-model="semesters[sem_index].courses[course_index].included">
+            <input :value="course.title" 
+                @input="updateComponentAttribute($event, sem_index, course_index, 'title')" 
+                placeholder="Course (e.g. EECS 445)" />
+            <input :value="course.credits" 
+                @input="updateComponentAttribute($event, sem_index, course_index, 'credits')" 
+                placeholder="Credit hours" />
+            <input v-if="course.custom" :value="course.grade" 
+                @input="updateComponentAttribute($event, sem_index, course_index, 'grade')" 
+                placeholder="Grade" disabled/>
+            <input v-else :value="course.grade" 
+                @input="updateComponentAttribute($event, sem_index, course_index, 'grade')" 
+                placeholder="Grade" />
+            <button @click="startCustomGrade(sem_index, course_index)">Custom Grade</button>
+            <button @click="removeComponent(sem_index, course_index, 'gpa')">Delete Course</button>
+          </div>
+          <p><button @click="addComponent(sem_index, 'gpa')">Add Course</button></p>
+          <p>Semester credits: {{semester.credits}}, Semester GPA: {{semester.gpa}}</p>
         </div>
-        <p><button @click="addComponent(sem_index, 'gpa')">Add Course</button></p>
-        <p>Semester credits: {{semester.credits}}, Semester GPA: {{semester.gpa}}</p>
       </div>
+      <hr>
+      <p><button @click="addSection()">Add Semester</button></p>
+      <p>Made on a 
+        <i class="icons fa fa-solid fa-plane fa-lg"></i> 
+        by <a target="_blank" href="https://devondoyle.com/">Devon Doyle</a>
+      </p>
     </div>
-    <hr>
-    <p><button @click="addSection()">Add Semester</button></p>
-    <p>Total credit hours: {{hours}}, Overall GPA: {{gpa}}</p>
-    <p>Made on a 
-      <i class="icons fa fa-solid fa-plane fa-lg"></i> 
-      by <a target="_blank" href="https://devondoyle.com/">Devon Doyle</a>
-    </p>
+    <div style="display: inline-block; width: 26%; text-align: center; position: fixed; vertical-align: top; margin-left: 2%;">
+      <div class="box">
+        <h2>Total Credits</h2>
+        <p>{{hours}}</p>
+        <hr style="width: 80%;">
+        <h2>Weighted GPA</h2>
+        <p>{{gpa}}</p>
+      </div>
+      <br>
+      <!--<div class="box">
+        <h2>Letter Grades</h2>
+        <hr style="width: 80%;">
+        <div v-for="(grade, gradeIndex) in gradeRef" :key="gradeIndex">
+          <p>{{grade}}</p>
+        </div>
+      </div>-->
+    </div>
   </div>
   <div id="course-grade-calc">
     <h1>Course Grade Calculator</h1>
@@ -400,7 +418,6 @@ export default {
 <style>
 html, body {
   margin: 0;
-  min-height: 100vh;
 }
 #app {
   min-height: 100vh;
@@ -415,6 +432,9 @@ html, body {
 #course-grade-calc {
   padding: 4%;
   display: none;
+}
+.extend {
+  min-height: 100vh;
 }
 #test {
   color: #36fa7a; /* old green */
@@ -446,12 +466,21 @@ i {
   padding: 4px;
 }
 .semester-data {
-  /*border: 1px solid white;
-  border-radius: 8px;*/
   padding: 1%;
+}
+.box {
+  border: 1px solid white;
+  border-radius: 8px;
+  padding: 1%;
+  width: 100%;
 }
 a {
   color: white;
+}
+hr {
+  border: 1px solid white;
+  border-bottom: none;
+  background-color: white;
 }
 
 </style>
