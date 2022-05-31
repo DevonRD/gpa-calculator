@@ -1,12 +1,18 @@
 <template>
 <div id="app" :style="{background: gradient}">
   <div id="gpa-calc-app">
-    
+    <h1>GPA Calculator 1.0</h1>
     <div style="width: 70%; display: inline-block; vertical-align: top;">
-      <h1>GPA Calculator 1.0</h1>
-      <p><button class="menu-button" @click="downloadData()">Save Data</button>
-      <button class="menu-button" @click="uploadData()">Load Data</button>
-      <button class="menu-button" @click="reset()">Reset</button></p>
+      
+      <p>
+        <button class="menu-button" @click="downloadData()">Save</button>
+        <button class="menu-button" @click="uploadData()">Load</button>
+        <button class="menu-button" @click="reset()">Reset</button>
+        <input type="radio" id="K-12" value="K-12" v-model="mode">
+          <label for="K-12">K-12</label>
+        <input type="radio" id="College" value="College" v-model="mode">
+          <label for="College">College</label>
+      </p>
 
       <div v-for="(semester, sem_index) in semesters"
           :key="sem_index" class="semester-wrapper">
@@ -16,49 +22,56 @@
             <input type="checkbox" id="semester-checkbox" 
                 @change="updateGPA()"
                 v-model="semester.included">
-            <input :value="semester.title" 
+            <input type="text" :value="semester.title" 
                 @input="updateSectionAttribute($event, sem_index, 'title', 'gpa')" 
-                placeholder="Semester (e.g. Fall 2022)" />
-            <button @click="removeSection(sem_index)">Delete Semester</button>
+                placeholder="Semester (e.g. Fall 2022)" class="shadow"/>
+            <i @click="removeSection(sem_index)" class="icons fa fa-solid fa-trash fa-lg fade-hover"></i>
           </p>
           <div v-for="(course, course_index) in semester.courses"
               :key="course_index">
             <input type="checkbox" id="course-checkbox" 
                 @change="updateGPA()"
                 v-model="semesters[sem_index].courses[course_index].included">
-            <input :value="course.title" 
+            <input type="text" :value="course.title" 
                 @input="updateComponentAttribute($event, sem_index, course_index, 'title')" 
-                placeholder="Course (e.g. EECS 445)" />
-            <input :value="course.credits" 
+                placeholder="Course (e.g. EECS 445)" class="shadow"/>
+            <input type="text" :value="course.credits" 
                 @input="updateComponentAttribute($event, sem_index, course_index, 'credits')" 
-                placeholder="Credit hours" />
-            <input v-if="course.custom" :value="course.grade" 
+                placeholder="Credit hours" class="shadow"/>
+            <i class="icons fa fa-thin fa-arrow-right fa-lg"></i>
+            <input v-if="course.custom" type="text" :value="course.grade" 
                 @input="updateComponentAttribute($event, sem_index, course_index, 'grade')" 
-                placeholder="Grade" disabled/>
-            <input v-else :value="course.grade" 
+                placeholder="Letter Grade" disabled/>
+            <input v-else type="text" :value="course.grade" 
                 @input="updateComponentAttribute($event, sem_index, course_index, 'grade')" 
-                placeholder="Grade" />
-            <button @click="startCustomGrade(sem_index, course_index)">Custom Grade</button>
-            <button @click="removeComponent(sem_index, course_index, 'gpa')">Delete Course</button>
+                placeholder="Letter Grade" class="shadow"/>
+             or 
+            <button @click="startCustomGrade(sem_index, course_index)">Calculate Grade</button>
+            <i @click="removeComponent(sem_index, course_index, 'gpa')" class="icons fa fa-solid fa-trash fa-lg fade-hover"></i>
           </div>
           <p><button @click="addComponent(sem_index, 'gpa')">Add Course</button></p>
-          <p>Semester credits: {{semester.credits}}, Semester GPA: {{semester.gpa}}</p>
+          <p>
+            <i class="icons fa fa-solid fa-calendar fa-lg"></i>
+            Semester credits: {{semester.credits}}
+            <i class="icons fa fa-solid fa-graduation-cap fa-lg"></i>
+            Semester GPA: {{semester.gpa}}
+          </p>
         </div>
       </div>
       <hr>
       <p><button @click="addSection()">Add Semester</button></p>
-      <p>Made on a 
-        <i class="icons fa fa-solid fa-plane fa-lg"></i> 
+      <p>
+        Made on a <i class="icons fa fa-solid fa-plane fa-lg"></i> 
         by <a target="_blank" href="https://devondoyle.com/">Devon Doyle</a>
       </p>
     </div>
-    <div style="display: inline-block; width: 26%; text-align: center; position: fixed; vertical-align: top; margin-left: 2%;">
+    <div style="width: 16.2%; display: inline-block; vertical-align: top; margin-left: 2.4%; position: fixed; text-align: center;">
       <div class="box">
         <h2>Total Credits</h2>
-        <p>{{hours}}</p>
+        <h2>{{hours}}</h2>
         <hr style="width: 80%;">
         <h2>Weighted GPA</h2>
-        <p>{{gpa}}</p>
+        <h2>{{gpa}}</h2>
       </div>
       <br>
       <!--<div class="box">
@@ -85,10 +98,10 @@
           <input type="checkbox" id="semester-checkbox" 
               @change="updateCourseGrade()"
               v-model="sec.included">
-          <input :value="sec.title" 
+          <input type="text" :value="sec.title" 
               @input="updateSectionAttribute($event, sec_index, 'title', 'grade')" 
               placeholder="Section (e.g. Quizzes)" />
-          <input :value="sec.weight" 
+          <input type="text" :value="sec.weight" 
               @input="updateSectionAttribute($event, sec_index, 'weight', 'grade')" 
               placeholder="Weight percent (e.g. 20%)" />
           <button @click="removeSection(sec_index, 'grade')">Delete</button>
@@ -98,13 +111,13 @@
           <input type="checkbox" id="course-checkbox" 
               @change="updateCourseGrade()"
               v-model="customGrades[sec_index].assignments[assign_index].included">
-          <input :value="assignment.title" 
+          <input type="text" :value="assignment.title" 
               @input="updateComponentAttribute($event, sec_index, assign_index, 'title', 'grade')" 
               placeholder="Assignment (e.g. Quiz 1)" />
-          <input :value="assignment.score" 
+          <input type="text" :value="assignment.score" 
               @input="updateComponentAttribute($event, sec_index, assign_index, 'score', 'grade')" 
               placeholder="Score" />
-          <input :value="assignment.points" 
+          <input type="text" :value="assignment.points" 
               @input="updateComponentAttribute($event, sec_index, assign_index, 'points', 'grade')" 
               placeholder="Out of" />
           <button @click="removeComponent(sec_index, assign_index, 'grade')">Delete</button>
@@ -173,7 +186,8 @@ export default {
       tempGrade: '',
       customGrades: [],
 
-      weightError: false
+      weightError: false,
+      mode: 'College'
     }
   },
   methods: {
@@ -427,7 +441,9 @@ html, body {
   color: white;
 }
 #gpa-calc-app {
-  padding: 4%;
+  padding-top: 4%;
+  padding-left: 15%;
+  padding-right: 15%;
   display: block;
 }
 #course-grade-calc {
@@ -456,12 +472,6 @@ button {
 button:hover {
   opacity: 60%;
 }
-.input {
-  background: none;
-  color: white;
-  border: none;
-  outline-color: white;
-}
 i {
   color: white;
   padding: 4px;
@@ -482,6 +492,25 @@ hr {
   border: 1px solid white;
   border-bottom: none;
   background-color: white;
+}
+input {
+  padding: 4px;
+  border: 0;
+  border-radius: 5px;
+  margin-left: 2px;
+  margin-right: 2px;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+}
+.shadow:hover {
+  box-shadow: 0 0 8px 6px rgba(255, 255, 255, 0.185);
+  outline-width: 0px;
+}
+.shadow:focus {
+  outline-width: 0px;
+}
+.fade-hover:hover {
+  opacity: 75%;
 }
 
 </style>
