@@ -8,9 +8,9 @@
         <button class="menu-button" @click="downloadData()">Save</button>
         <button class="menu-button" @click="uploadData()">Load</button>
         <button class="menu-button" @click="reset()">Reset</button>
-        <input type="radio" id="K-12" value="K-12" v-model="mode">
+        <input type="radio" id="K-12" value="K-12" v-model="mode" @change="updateGPA()">
           <label for="K-12">K-12</label>
-        <input type="radio" id="College" value="College" v-model="mode">
+        <input type="radio" id="College" value="College" v-model="mode" @change="updateGPA()">
           <label for="College">College</label>
       </p>
 
@@ -35,7 +35,7 @@
             <input type="text" :value="course.title" 
                 @input="updateComponentAttribute($event, sem_index, course_index, 'title')" 
                 placeholder="Course (e.g. EECS 445)" class="shadow"/>
-            <input type="text" :value="course.credits" 
+            <input v-if="mode == 'College'" type="text" :value="course.credits" 
                 @input="updateComponentAttribute($event, sem_index, course_index, 'credits')" 
                 placeholder="Credit hours" class="shadow"/>
             <i class="icons fa fa-thin fa-arrow-right fa-lg"></i>
@@ -191,15 +191,6 @@ export default {
     }
   },
   methods: {
-    /*
-    onInput(e) {
-      this.text = e.target.value;
-    },
-    onMath(e) {
-      this.math = parseFloat(e.target.value) * Math.PI;
-      this.mathtext = e.target.value;
-    },
-    */
     updateSectionAttribute(e, sec_index, attribute, mode='gpa') {
       if (mode == 'gpa') this.semesters[sec_index][attribute] = e.target.value;
       else this.customGrades[sec_index][attribute] = e.target.value;
@@ -222,13 +213,15 @@ export default {
     updateGPA() {
       let points = 0;
       let hours = 0;
+      let mode = this.mode;
       this.semesters.forEach(function(semester) {
         let semPoints = 0;
         let semHours = 0;
         semester['courses'].forEach(function(course) {
           if (course.included) {
-            semPoints += parseInt(course.credits) * ref[course.grade.toUpperCase()][0];
-            semHours += parseInt(course.credits);
+            let tempCredits = (mode == 'College') ? parseInt(course.credits) : 1;
+            semPoints += tempCredits * ref[course.grade.toUpperCase()][0];
+            semHours += tempCredits;
           }
         });
         semester.credits = semHours;
@@ -348,7 +341,11 @@ export default {
     },
 
     downloadData() {
-      let dataString = JSON.stringify(this.semesters);
+      let saveData = {
+        semesters: this.semesters,
+        mode: this.mode
+      };
+      let dataString = JSON.stringify(saveData);
       let elem = document.createElement('a');
       elem.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataString));
       elem.setAttribute('download', 'GPACalculatorData.json');
@@ -369,7 +366,10 @@ export default {
           let content = readerEvent.target.result;
           console.log('PARSED');
           console.log(JSON.parse(content));
-          this.semesters = JSON.parse(content);
+          let saveData = JSON.parse(content);
+          
+          this.semesters = saveData.semesters;
+          this.mode = saveData.mode;
           this.updateGPA();
         }
       }
