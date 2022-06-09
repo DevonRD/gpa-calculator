@@ -220,7 +220,10 @@ export default {
         semester['courses'].forEach(function(course) {
           if (course.included) {
             let tempCredits = (mode == 'College') ? parseInt(course.credits) : 1;
-            semPoints += tempCredits * ref[course.grade.toUpperCase()][0];
+            let gradeParse = parseFloat(course.grade);
+            let tempGrade = (Number.isNaN(gradeParse)) ? ref[course.grade.toUpperCase()][0] : gradeParse;
+            
+            semPoints += tempCredits * tempGrade;
             semHours += tempCredits;
           }
         });
