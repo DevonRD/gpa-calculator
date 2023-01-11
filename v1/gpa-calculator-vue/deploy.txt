@@ -1,0 +1,4 @@
+navigate to gpa-calculator-app directory
+	npm run build
+move "dist" folder contents to main directory
+push to git
