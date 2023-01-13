@@ -13,19 +13,19 @@ import {
 } from 'semantic-ui-react'
 
 const letterGrades = {
-    "A+": [4.0, 97.0],
-    "A": [4.0, 93.0],
-    "A-": [3.7, 90.0],
-    "B+": [3.3, 87.0],
-    "B": [3.0, 83.0],
-    "B-": [2.7, 80.0],
-    "C+": [2.3, 77.0],
-    "C": [2.0, 73.0],
-    "C-": [1.7, 70.0],
-    "D+": [1.3, 67.0],
-    "D": [1.0, 63.0],
-    "D-": [0.7, 60.0],
-    "F": [0.0, 0.0]
+    "A+": 4.0,
+    "A": 4.0,
+    "A-": 3.7,
+    "B+": 3.3,
+    "B": 3.0,
+    "B-": 2.7,
+    "C+": 2.3,
+    "C": 2.0,
+    "C-": 1.7,
+    "D+": 1.3,
+    "D": 1.0,
+    "D-": 0.7,
+    "F": 0.0
 };
 
 const initialState = {
@@ -33,6 +33,8 @@ const initialState = {
     collegeMode: true,
     gpa: 0.0,
     credits: 0,
+    excludedCredits: 0,
+    failedCredits: 0,
     semesters: [],
     runningId: 0
 };
@@ -57,6 +59,7 @@ class App extends React.Component {
                     'courses': [],
                     'credits': 0,
                     'gpa': 0,
+                    'included': true,
                     'id': newId
                 }
             ],
@@ -72,6 +75,7 @@ class App extends React.Component {
                 'name': '',
                 'credits': '',
                 'grade': '',
+                'included': true,
                 'id': newId
             });
         this.setState({semesters: newSemesters, runningId: newId});
@@ -100,33 +104,54 @@ class App extends React.Component {
     }
 
     calculateGPA = () => {
-        var totalCredits = 0;
-        var totalPoints = 0;
         var newState = this.state;
+        var totalIncludedCredits = 0;
+        var totalExcludedCredits = 0;
+        var totalFailedCredits = 0;
+        var totalPoints = 0;
         for (let semester = 0; semester < newState.semesters.length; semester++) {
-            let semesterCredits = 0;
+            let semesterIncludedCredits = 0;
+            let semesterExcludedCredits = 0;
+            let semesterFailedCredits = 0;
             let semesterPoints = 0;
             for (const course of newState.semesters[semester].courses) {
-                let grade = course.grade.toUpperCase();
+                let grade = 
+                    course.grade.toUpperCase();
+                let points = 
+                    isNaN(grade) ? letterGrades[grade] ?? 0.0 : parseFloat(grade);
+                let credits = 
+                    this.state.collegeMode ? parseInt(course.credits) : 1;
+                let failed = points == 0;
 
-                let points = isNaN(grade) ?
-                    letterGrades[grade][0] : parseFloat(grade);
-
-                let credits = this.state.collegeMode ?
-                    parseInt(course.credits) : 1;
-
-                semesterCredits += credits;
-                semesterPoints += points * credits;
+                if (course.included) {
+                    semesterIncludedCredits += credits;
+                    if (failed) {
+                        semesterFailedCredits += credits;
+                        credits = 0;
+                    }
+                    semesterPoints += points * credits;
+                }
+                else semesterExcludedCredits += credits;
             }
-            newState.semesters[semester].credits = semesterCredits;
-            newState.semesters[semester].gpa = 
-                (semesterPoints / semesterCredits).toFixed(3);
-            totalCredits += semesterCredits;
-            totalPoints += semesterPoints;
+            newState.semesters[semester].credits = 
+                semesterIncludedCredits - semesterFailedCredits;
+            newState.semesters[semester].gpa = semesterIncludedCredits > 0 ?
+                (semesterPoints / semesterIncludedCredits).toFixed(3) : 0.0;
+            
+            if (newState.semesters[semester].included) {
+                totalIncludedCredits += semesterIncludedCredits;
+                totalFailedCredits += semesterFailedCredits;
+                totalPoints += semesterPoints
+            }
+            else totalExcludedCredits += semesterIncludedCredits;
+            totalExcludedCredits += semesterExcludedCredits;
         }
-        newState.credits = totalCredits;
-        newState.gpa = (totalPoints / totalCredits).toFixed(3);
-        newState.gpa = isNaN(newState.gpa) ? 'Err' : newState.gpa
+        newState.credits = totalIncludedCredits - totalFailedCredits;
+        newState.excludedCredits = totalExcludedCredits;
+        newState.failedCredits = totalFailedCredits;
+        newState.gpa = totalIncludedCredits > 0 ?
+            (totalPoints / totalIncludedCredits).toFixed(3) : 0.0;
+        newState.gpa = isNaN(newState.gpa) ? 'Err' : newState.gpa;
         this.setState(newState);
     }
 
@@ -194,11 +219,32 @@ class App extends React.Component {
             results = <Segment raised className='gpa-display'>
                             <Statistic label='Credits' value={this.state.credits} />
                             <Statistic label='GPA' value={this.state.gpa} />
+                            {this.state.excludedCredits > 0 ? 
+                                <Statistic
+                                    color='yellow'
+                                    label='Excluded Credits'
+                                    value={this.state.excludedCredits}
+                                /> : ''
+                            }
+                            {/* {this.state.failedCredits > 0 ? 
+                                <Statistic
+                                    color='red'
+                                    label='Failed Credits'
+                                    value={this.state.failedCredits}
+                                /> : ''
+                            } */}
                         </Segment>;
         }
         else {
             results = <Segment raised className='gpa-display'>
                             <Statistic label='GPA' value={this.state.gpa} />
+                            {this.state.excludedCredits > 0 ? 
+                                <Statistic
+                                    color='yellow'
+                                    label='Excluded Classes'
+                                    value={this.state.excludedCredits}
+                                /> : ''
+                            }
                         </Segment>;
         }
         
