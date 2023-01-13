@@ -282,6 +282,7 @@ class App extends React.Component {
                 <Modal open={this.state.helpOpen} >
                     <Modal.Header>Test modal</Modal.Header>
                     <Modal.Actions>
+                        <a href='v1/index.html'><Button>Old</Button></a>
                         <Button onClick={this.toggleHelp}>Close</Button>
                     </Modal.Actions>
                 </Modal>
